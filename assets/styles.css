@@ -38,13 +38,13 @@ header.scrolled {
 .logo {
     font-family: 'Great Vibes', cursive;
     font-size: 2.5em;
-    color: #B76E79;
+    color: #5b79cc;
     margin: 0;
     transition: color 0.3s;
 }
 
 .logo:hover {
-    color: #D4AF37;
+    color: #5b79cc;
 }
 
 nav ul {
@@ -98,10 +98,6 @@ nav ul li a:hover::after {
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
 }
 
 .hamburger span {
@@ -153,12 +149,11 @@ section.visible {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 150px 20px 80px;
+    padding: 150px 0px 80px;
 }
 
 #hero .hero-content {
     max-width: 100%;
-    margin-bottom: 20px;
 }
 
 #hero .hero-image {
@@ -187,7 +182,7 @@ section.visible {
 #hero h1 {
     font-family: 'Playfair Display', serif;
     font-size: 2.5em;
-    color: #B76E79;
+    color: #5b79cc;
     margin-bottom: 20px;
 }
 
@@ -200,7 +195,7 @@ section.visible {
    CTA BUTTON
 =========================== */
 .cta {
-    background: #B76E79;
+    background: #5b79cc;
     color: white;
     padding: 15px 30px;
     text-decoration: none;
@@ -252,7 +247,7 @@ section.visible {
 }
 
 .gallery-box {
-    background: #FADADD;
+    background: #6791df;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
@@ -260,7 +255,7 @@ section.visible {
 
 .gallery-box .label {
     font-size: 1.4em;
-    color: #B76E79;
+    color: #ffffff;
     margin-bottom: 15px;
 }
 
@@ -345,7 +340,7 @@ section.visible {
    FOOTER
 =========================== */
 footer {
-    background: #B76E79;
+    background: #5b79cc;
     color: white;
     padding: 20px;
     text-align: center;
@@ -373,7 +368,7 @@ footer a:hover {
 
 #contact h2 {
     font-family: 'Playfair Display', serif;
-    color: #B76E79;
+    color: #5b79cc;
 }
 
 form {
@@ -392,11 +387,11 @@ input, textarea {
 }
 
 input:focus, textarea:focus {
-    border: 1px solid #B76E79;
+    border: 1px solid #5b79cc;
 }
 
 button {
-    background: #B76E79;
+    background: #5b79cc;
     color: white;
     border: none;
     padding: 15px;
