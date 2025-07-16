@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Inline Styles -->
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 3rem 1rem;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+            color: #222;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background-color: #aaa;
+            transition: width 0.3s ease;
+        }
+
+        h1:hover::after {
+            width: 100%;
+        }
+
+        /* Category Styles */
+        .category {
+            max-width: 1200px;
+            margin: 0 auto 4rem auto;
+        }
+
+        .category h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            color: #222;
+        }
+
+        .category h2::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20%;
+            height: 2px;
+            background-color: #aaa;
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-inner {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-column {
+            min-width: 50%; /* Two columns visible */
+            display: grid;
+            grid-template-rows: repeat(2, auto);
+            gap: 1.5rem;
+            padding: 0 0.75rem;
+        }
+
+        /* Grid Item Styles */
+        .grid-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        .grid-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .image-wrapper:hover img {
+            transform: scale(1.1);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-wrapper:hover .overlay {
+            opacity: 1;
+        }
+
+        .overlay i {
+            color: #fff;
+            font-size: 3rem;
+            transition: transform 0.3s ease;
+        }
+
+        .overlay i:hover {
+            transform: scale(1.2);
+        }
+
+        figcaption {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            color: #444;
+            font-weight: 300;
+            padding: 0.5rem;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+            font-style: italic;
+        }
+
+        /* Carousel Buttons */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        .prev-btn {
+            left: 0;
+        }
+
+        .next-btn {
+            right: 0;
+        }
+
+        /* Lightbox Styles */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #lightbox-img {
+            max-width: 85%;
+            max-height: 85%;
+            border: 5px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        #lightbox.active #lightbox-img {
+            transform: scale(1);
+        }
+
+        .lightbox-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 2rem;
+        }
+
+        .lightbox-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 3rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-btn:hover {
+            opacity: 1;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            .carousel-column {
+                min-width: 100%; /* One column visible on mobile */
+            }
+
+            .prev-btn, .next-btn {
+                font-size: 1.5rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Photo Gallery</h1>
+    </header>
+    <main>
+        <section class="category">
+            <h2>Regular</h2>
+            <div class="carousel-container">
+                <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="carousel-inner">
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/10/600/400" alt="Photo 1">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 1</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/11/600/400" alt="Photo 2">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 2</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/12/600/400" alt="Photo 3">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 3</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/13/600/400" alt="Photo 4">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 4</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/14/600/400" alt="Photo 5">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 5</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/15/600/400" alt="Photo 6">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 6</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+        <section class="category">
+            <h2>Premium</h2>
+            <div class="carousel-container">
+                <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="carousel-inner">
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/16/600/400" alt="Photo 7">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 7</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/17/600/400" alt="Photo 8">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 8</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/18/600/400" alt="Photo 9">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 9</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/19/600/400" alt="Photo 10">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 10</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/20/600/400" alt="Photo 11">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 11</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/21/600/400" alt="Photo 12">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 12</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+        <section class="category">
+            <h2>Exclusive</h2>
+            <div class="carousel-container">
+                <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="carousel-inner">
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/22/600/400" alt="Photo 13">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 13</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/23/600/400" alt="Photo 14">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 14</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/24/600/400" alt="Photo 15">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 15</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/25/600/400" alt="Photo 16">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 16</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-column">
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/26/600/400" alt="Photo 17">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 17</figcaption>
+                        </figure>
+                        <figure class="grid-item">
+                            <div class="image-wrapper">
+                                <img src="https://picsum.photos/id/27/600/400" alt="Photo 18">
+                                <div class="overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            <figcaption>Photo 18</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lightbox -->
+    <div id="lightbox">
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <img id="lightbox-img" src="" alt="Fullscreen Photo">
+        <div class="lightbox-controls">
+            <button class="lightbox-btn lb-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="lightbox-btn lb-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Inline Script -->
+    <script>
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carousel functionality for each category
+            document.querySelectorAll('.carousel-container').forEach(container => {
+                const carouselInner = container.querySelector('.carousel-inner');
+                const prevBtn = container.querySelector('.prev-btn');
+                const nextBtn = container.querySelector('.next-btn');
+                const columns = container.querySelectorAll('.carousel-column');
+                let currentColumn = 0;
+
+                const isMobile = window.innerWidth <= 768;
+                const visibleColumns = isMobile ? 1 : 2;
+                const columnWidth = isMobile ? 100 : 50;
+
+                function updateCarousel() {
+                    carouselInner.style.transform = `translateX(-${currentColumn * columnWidth}%)`;
+                }
+
+                prevBtn.addEventListener('click', () => {
+                    if (currentColumn > 0) {
+                        currentColumn -= visibleColumns;
+                        if (currentColumn < 0) currentColumn = 0;
+                        updateCarousel();
+                    }
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    if (currentColumn < columns.length - visibleColumns) {
+                        currentColumn += visibleColumns;
+                        if (currentColumn > columns.length - visibleColumns) currentColumn = columns.length - visibleColumns;
+                        updateCarousel();
+                    }
+                });
+            });
+
+            // Lightbox functionality
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const closeBtn = document.querySelector('.close-btn');
+            const lbPrev = document.querySelector('.lb-prev');
+            const lbNext = document.querySelector('.lb-next');
+            const images = Array.from(document.querySelectorAll('.image-wrapper img'));
+            let currentIndex = 0;
+
+            function openLightbox(index) {
+                currentIndex = index;
+                lightboxImg.src = images[currentIndex].src;
+                lightbox.classList.add('active');
+                document.body.style.overflowY = 'hidden';
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflowY = 'auto';
+            }
+
+            function showLbPrev() {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                lightboxImg.src = images[currentIndex].src;
+            }
+
+            function showLbNext() {
+                currentIndex = (currentIndex + 1) % images.length;
+                lightboxImg.src = images[currentIndex].src;
+            }
+
+            images.forEach((image, index) => {
+                image.addEventListener('click', () => openLightbox(index));
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            lbPrev.addEventListener('click', showLbPrev);
+            lbNext.addEventListener('click', showLbNext);
+
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('active')) {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowLeft') {
+                        showLbPrev();
+                    } else if (e.key === 'ArrowRight') {
+                        showLbNext();
+                    }
+                }
+            });
+
+            // Fade-in animation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, i * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.grid-item').forEach(item => {
+                observer.observe(item);
+            });
+        });
+    </script>
+</body>
+</html>
